@@ -1,0 +1,26 @@
+[
+  {
+    "id": "task-welcome-1",
+    "title": "Explorar o Kanban Tray",
+    "description": "Aplicativo de quadro Kanban que vive na bandeja do sistema (System Tray) com atalhos globais e sincronização em tempo real.",
+    "status": "done",
+    "priority": "low",
+    "updated_at": "2026-10-15T12:00:00.000Z"
+  },
+  {
+    "id": "task-welcome-2",
+    "title": "Personalizar atalhos de teclado e tema",
+    "description": "Clique na tag de atalho no canto superior esquerdo para escolher sua combinação favorita (ex: Alt+Espaço) e clique no ícone do app para alternar o tema.",
+    "status": "in_progress",
+    "priority": "medium",
+    "updated_at": "2026-10-15T12:05:00.000Z"
+  },
+  {
+    "id": "task-welcome-3",
+    "title": "Integrar com Agentes de IA",
+    "description": "Utilize comandos determinísticos no terminal (npm run task -- list, npm run task -- add) para automatizar o fluxo de trabalho com LLMs.",
+    "status": "todo",
+    "priority": "high",
+    "updated_at": "2026-10-15T12:10:00.000Z"
+  }
+]

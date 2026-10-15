@@ -1,0 +1,13 @@
+# Cursor Rules - Kanban Tray
+
+# CRITICAL TASK PROTOCOL:
+# Never edit tasks.json directly using file writing or editing tools.
+# Always run deterministic CLI commands:
+# - npm run task -- list
+# - npm run task -- start <id>
+# - npm run task -- done <id>
+# - npm run task -- move <id> <status>
+# - npm run task -- add "<Title>" ["<Description>"] [low|medium|high]
+# - npm run task -- delete <id>
+
+# Refer to .ai-rules/tarefas_para_hoje.md for detailed documentation.

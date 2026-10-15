@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanban Tray</title>
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="/main.js" defer></script>
+  </head>
+  <body>
+    <div class="app-window">
+      <!-- Cabeçalho Compacto & Fino (Área Arrastável) -->
+      <header class="app-header" data-tauri-drag-region>
+        <div class="header-brand" data-tauri-drag-region>
+          <button class="brand-icon-btn" id="btn-theme-toggle" title="Clique para alternar o tema (Minimalista / Dark Glass)" aria-label="Alternar tema">
+            <img src="assets/logo.png" class="brand-icon" width="16" height="16" alt="Logo" />
+          </button>
+          <span class="brand-title" data-tauri-drag-region title="Atalho global para abrir/fechar: Ctrl+Espaço">Kanban Tray</span>
+          <button class="shortcut-tag shortcut-btn" id="btn-shortcut-config" title="Clique para personalizar o atalho global do sistema">Ctrl+Espaço</button>
+          <div class="sync-status" id="sync-status" title="Sincronização em tempo real ativa com tasks.json">
+            <span class="status-dot"></span>
+            <span class="status-text">AI Sync</span>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <div class="search-box">
+            <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="search-input" placeholder="Filtrar tarefas..." autocomplete="off" />
+            <button id="search-clear" class="search-clear" style="display: none;">&times;</button>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button id="btn-new-task" class="btn-action-primary" title="Criar Nova Tarefa (Ctrl+N)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Nova</span>
+          </button>
+
+          <button id="btn-open-json" class="btn-icon" title="Abrir tasks.json no editor">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </button>
+
+          <!-- Botão de Fixar Janela (Pin) -->
+          <button id="btn-pin-window" class="btn-icon btn-pin" title="Fixar janela (não fechar ao clicar fora)">
+            <svg class="pin-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="17" x2="12" y2="22"></line>
+              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Quadro Kanban Principal - 3 Colunas Sempre Visíveis -->
+      <main class="board-grid" id="board-container">
+        <!-- Coluna 1: A Fazer -->
+        <section class="kanban-column" data-status="todo" id="col-todo">
+          <div class="column-header">
+            <div class="col-title-wrap">
+              <span class="col-dot todo"></span>
+              <h2 class="column-title">A Fazer</h2>
+            </div>
+            <span class="col-count" id="count-todo">0</span>
+          </div>
+          <div class="cards-list" data-status="todo" id="cards-todo">
+            <!-- Cards injetados via JS -->
+          </div>
+          <button class="btn-col-add" data-status="todo" title="Adicionar tarefa em A Fazer">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Adicionar tarefa</span>
+          </button>
+        </section>
+
+        <!-- Coluna 2: Em Andamento -->
+        <section class="kanban-column" data-status="in_progress" id="col-in_progress">
+          <div class="column-header">
+            <div class="col-title-wrap">
+              <span class="col-dot in_progress"></span>
+              <h2 class="column-title">Em Andamento</h2>
+            </div>
+            <span class="col-count" id="count-in_progress">0</span>
+          </div>
+          <div class="cards-list" data-status="in_progress" id="cards-in_progress">
+            <!-- Cards injetados via JS -->
+          </div>
+          <button class="btn-col-add" data-status="in_progress" title="Adicionar tarefa em Em Andamento">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Adicionar tarefa</span>
+          </button>
+        </section>
+
+        <!-- Coluna 3: Concluído -->
+        <section class="kanban-column" data-status="done" id="col-done">
+          <div class="column-header">
+            <div class="col-title-wrap">
+              <span class="col-dot done"></span>
+              <h2 class="column-title">Concluído</h2>
+            </div>
+            <span class="col-count" id="count-done">0</span>
+          </div>
+          <div class="cards-list" data-status="done" id="cards-done">
+            <!-- Cards injetados via JS -->
+          </div>
+          <button class="btn-col-add" data-status="done" title="Adicionar tarefa em Concluído">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Adicionar tarefa</span>
+          </button>
+        </section>
+      </main>
+
+      <!-- Rodapé Compacto -->
+      <footer class="app-footer">
+        <span class="footer-tip">💡 Duplo clique para ler completo • Arraste para mover</span>
+        <button id="btn-refresh" class="footer-btn footer-pill-action" title="Recarregar tarefas">
+          <span class="footer-pill-dot"></span>
+          <span>↻ Sincronizar</span>
+        </button>
+      </footer>
+    </div>
+
+    <!-- Modal de Visualização Completa da Tarefa (Duplo Clique) -->
+    <div class="modal-backdrop" id="view-task-modal" style="display: none;">
+      <div class="modal-card modal-view-card">
+        <div class="modal-header view-modal-header">
+          <div class="view-header-badges">
+            <span class="status-badge" id="view-task-status">A Fazer</span>
+            <span class="priority-tag" id="view-task-priority">Média</span>
+            <span class="view-task-date" id="view-task-date">agora</span>
+          </div>
+          <button class="btn-icon" id="view-modal-close" title="Fechar (Esc)">&times;</button>
+        </div>
+
+        <div class="view-content">
+          <h2 class="view-title" id="view-task-title"></h2>
+          <div class="view-meta-row">
+            <span class="view-label">Descrição Detalhada</span>
+            <span class="view-timestamp" id="view-task-timestamp"></span>
+          </div>
+          <div class="view-desc-scroll">
+            <div class="view-desc" id="view-task-desc"></div>
+          </div>
+        </div>
+
+        <div class="modal-actions view-actions">
+          <div class="view-quick-move" id="view-quick-move"></div>
+          <div class="view-main-buttons">
+            <button type="button" class="btn-cancel" id="btn-view-close">Fechar</button>
+            <button type="button" class="btn-submit btn-edit-from-view" id="btn-view-edit">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+              </svg>
+              <span>Editar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Criação / Edição de Tarefas -->
+    <div class="modal-backdrop" id="task-modal" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modal-title">Nova Tarefa</h3>
+          <button class="btn-icon" id="modal-close">&times;</button>
+        </div>
+        <form id="task-form" class="modal-form">
+          <input type="hidden" id="task-id" />
+          
+          <div class="form-group">
+            <label for="task-title-input">Título <span class="required">*</span></label>
+            <input type="text" id="task-title-input" placeholder="Ex: Criar testes unitários" required autofocus />
+          </div>
+
+          <div class="form-group">
+            <label for="task-desc-input">Descrição</label>
+            <textarea id="task-desc-input" rows="3" placeholder="Critérios, notas ou instruções..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Prioridade</label>
+            <div class="priority-selector">
+              <label class="priority-option priority-low">
+                <input type="radio" name="priority" value="low" />
+                <span>🟢 Baixa</span>
+              </label>
+              <label class="priority-option priority-medium">
+                <input type="radio" name="priority" value="medium" checked />
+                <span>🟡 Média</span>
+              </label>
+              <label class="priority-option priority-high">
+                <input type="radio" name="priority" value="high" />
+                <span>🔴 Alta</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" id="btn-modal-cancel">Cancelar</button>
+            <button type="submit" class="btn-submit" id="btn-modal-submit">Salvar Tarefa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão (In-App) -->
+    <div class="modal-backdrop" id="delete-modal" style="display: none;">
+      <div class="modal-card modal-confirm-card">
+        <div class="confirm-header">
+          <div class="confirm-icon">🗑️</div>
+          <h3 class="confirm-title">Excluir Tarefa?</h3>
+        </div>
+        <p class="confirm-text" id="delete-modal-text">Deseja realmente excluir esta tarefa?</p>
+        <div class="modal-actions confirm-actions">
+          <button type="button" class="btn-cancel" id="btn-delete-cancel">Cancelar</button>
+          <button type="button" class="btn-danger" id="btn-delete-confirm">Sim, Excluir</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Configuração de Atalho Global -->
+    <div class="modal-backdrop" id="shortcut-modal" style="display: none;">
+      <div class="modal-card modal-shortcut-card">
+        <div class="modal-header">
+          <div class="shortcut-modal-title-wrap">
+            <span class="shortcut-modal-icon">⌨️</span>
+            <h3>Atalho Global do Sistema</h3>
+          </div>
+          <button class="btn-icon" id="shortcut-modal-close" title="Fechar (Esc)">&times;</button>
+        </div>
+
+        <div class="shortcut-modal-body">
+          <p class="shortcut-instructions">
+            Pressione a combinação de teclas no teclado ou clique em uma das sugestões rápidas abaixo.
+          </p>
+
+          <div class="recorder-wrapper">
+            <label class="recorder-label">Atalho selecionado</label>
+            <div class="shortcut-recorder-box" id="shortcut-recorder" tabindex="0" title="Clique aqui e pressione as teclas">
+              <div class="recorder-keys" id="recorder-keys-display">
+                <kbd class="key-badge">Ctrl</kbd>
+                <span class="key-sep">+</span>
+                <kbd class="key-badge">Espaço</kbd>
+              </div>
+              <span class="recorder-hint" id="recorder-hint">Clique para gravar</span>
+            </div>
+            <p class="recorder-error" id="shortcut-error" style="display: none;"></p>
+          </div>
+
+          <div class="shortcut-presets-section">
+            <span class="presets-label">Atalhos rápidos sugeridos:</span>
+            <div class="shortcut-presets-list" id="shortcut-presets-list">
+              <button type="button" class="preset-pill" data-shortcut="CommandOrControl+Space">Ctrl + Espaço</button>
+              <button type="button" class="preset-pill" data-shortcut="Alt+Space">Alt + Espaço</button>
+              <button type="button" class="preset-pill" data-shortcut="CommandOrControl+Shift+K">Ctrl + Shift + K</button>
+              <button type="button" class="preset-pill" data-shortcut="Alt+K">Alt + K</button>
+              <button type="button" class="preset-pill" data-shortcut="F9">F9</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions shortcut-actions">
+          <button type="button" class="btn-cancel" id="btn-shortcut-cancel">Cancelar</button>
+          <button type="button" class="btn-submit" id="btn-shortcut-save">Salvar Atalho</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast-message"></div>
+  </body>
+</html>
